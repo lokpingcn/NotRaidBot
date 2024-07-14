@@ -28,11 +28,11 @@ namespace SysBot.Pokemon.Discord
                     AddLogChannel(c, ch.ID);
             }
 
-            LogUtil.LogInfo("Added logging to Discord channel(s) on Bot startup.", "Discord");
+            LogUtil.LogInfo("在 Bot 啟動時新增了對 Discord 通道的日誌記錄.", "Discord");
         }
 
         [Command("logHere")]
-        [Summary("Makes the bot log to the channel.")]
+        [Summary("使機器人登入頻道")]
         [RequireSudo]
         public async Task AddLogAsync()
         {

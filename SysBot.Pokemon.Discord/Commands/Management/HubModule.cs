@@ -13,7 +13,7 @@ namespace SysBot.Pokemon.Discord
     {
         [Command("status")]
         [Alias("stats")]
-        [Summary("Gets the status of the bot environment.")]
+        [Summary("取得機器人環境的狀態")]
         public async Task GetStatusAsync()
         {
             var me = SysCord<T>.Runner;
@@ -42,7 +42,7 @@ namespace SysBot.Pokemon.Discord
         private static string SummarizeBots(IReadOnlyCollection<RoutineExecutor<PokeBotState>> bots)
         {
             if (bots.Count == 0)
-                return "No bots configured.";
+                return "沒有配置機器人";
             var summaries = bots.Select(z => $"- {z.GetSummary()}");
             return Environment.NewLine + string.Join(Environment.NewLine, summaries);
         }

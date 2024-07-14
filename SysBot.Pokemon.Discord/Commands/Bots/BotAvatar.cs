@@ -17,13 +17,13 @@ namespace SysBot.Pokemon.Discord
         {
             if (Context.Message.Attachments.Count == 0)
             {
-                await ReplyAsync("Please attach a GIF image to set as the avatar."); // standard (boring) images can be set via dashboard
+                await ReplyAsync("请附上 GIF 图片以设置为头像。"); // standard (boring) images can be set via dashboard
                 return;
             }
             var attachment = Context.Message.Attachments.First();
             if (!attachment.Filename.EndsWith(".gif"))
             {
-                await ReplyAsync("Please provide a GIF image.");
+                await ReplyAsync("请提供 GIF 图片");
                 return;
             }
 
@@ -34,7 +34,7 @@ namespace SysBot.Pokemon.Discord
             var image = new Image(ms);
             await Context.Client.CurrentUser.ModifyAsync(user => user.Avatar = image);
 
-            await ReplyAsync("Avatar updated successfully!");
+            await ReplyAsync("头像更新成功！");
         }
     }
 }

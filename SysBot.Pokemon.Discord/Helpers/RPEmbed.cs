@@ -35,8 +35,8 @@ public static class RPEmbed
 
         embed.WithAuthor(auth =>
         {
-            auth.Name = "Pokémon Updated!";
-            auth.Url = "https://notpaldea.net";
+            auth.Name = "宝可梦升级!";
+            auth.Url = "https://google.com.hk";
         });
 
         return embed.Build();

@@ -83,7 +83,7 @@ namespace SysBot.Pokemon.Discord
 
         [Command("Announce", RunMode = RunMode.Async)]
         [Alias("announce")]
-        [Summary("Sends an announcement to all EchoChannels added by the aec command.")]
+        [Summary("向 aec 指令新增的所有迴聲通道發送公告。")]
         [RequireOwner]
         public async Task AnnounceAsync([Remainder] string announcement)
         {
@@ -99,7 +99,7 @@ namespace SysBot.Pokemon.Discord
                 Color = embedColor,
                 Description = embedDescription
             }
-            .WithTitle("Important Announcement!")
+            .WithTitle("重要公告！")
             .WithThumbnailUrl(thumbnailUrl)
             .Build();
 
@@ -110,7 +110,7 @@ namespace SysBot.Pokemon.Discord
                 var channel = client.GetChannel(channelId) as ISocketMessageChannel;
                 if (channel == null)
                 {
-                    LogUtil.LogError($"Failed to find or access channel {channelId}", nameof(AnnounceAsync));
+                    LogUtil.LogError($"找不到或存取頻道失敗 {channelId}", nameof(AnnounceAsync));
                     continue;
                 }
 
@@ -120,10 +120,10 @@ namespace SysBot.Pokemon.Discord
                 }
                 catch (Exception ex)
                 {
-                    LogUtil.LogError($"Failed to send announcement to channel {channel.Name}: {ex.Message}", nameof(AnnounceAsync));
+                    LogUtil.LogError($"無法向頻道發送公告 {channel.Name}: {ex.Message}", nameof(AnnounceAsync));
                 }
             }
-            var confirmationMessage = await ReplyAsync("Announcement sent to all EchoChannels.").ConfigureAwait(false);
+            var confirmationMessage = await ReplyAsync("發送至所有 Echo 頻道的公告").ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             await confirmationMessage.DeleteAsync().ConfigureAwait(false);
             await Context.Message.DeleteAsync().ConfigureAwait(false);
@@ -201,7 +201,7 @@ namespace SysBot.Pokemon.Discord
 
         [Command("addEmbedChannel")]
         [Alias("aec")]
-        [Summary("Makes the bot post raid embeds to the channel.")]
+        [Summary("使機器人在raid後嵌入頻道中。")]
         [RequireSudo]
         public async Task AddEchoAsync()
         {
@@ -209,7 +209,7 @@ namespace SysBot.Pokemon.Discord
             var cid = c.Id;
             if (Channels.TryGetValue(cid, out _))
             {
-                await ReplyAsync("Already notifying here.").ConfigureAwait(false);
+                await ReplyAsync("已經在這裡通知了。").ConfigureAwait(false);
                 return;
             }
 
@@ -217,7 +217,7 @@ namespace SysBot.Pokemon.Discord
 
             // Add to discord global loggers (saves on program close)
             SysCordSettings.Settings.EchoChannels.AddIfNew(new[] { GetReference(Context.Channel) });
-            await ReplyAsync("Added Raid Embed output to this channel!").ConfigureAwait(false);
+            await ReplyAsync("向此頻道添加了 Raid Embed 輸出！").ConfigureAwait(false);
         }
 
         private static async Task<bool> SendMessageWithRetry(ISocketMessageChannel c, string message, int maxRetries = 3)
@@ -232,7 +232,7 @@ namespace SysBot.Pokemon.Discord
                 }
                 catch (Exception ex)
                 {
-                    LogUtil.LogError($"Failed to send message to channel '{c.Name}' (Attempt {retryCount + 1}): {ex.Message}", nameof(AddEchoChannel));
+                    LogUtil.LogError($"向頻道發送訊息失敗 '{c.Name}' (Attempt {retryCount + 1}): {ex.Message}", nameof(AddEchoChannel));
                     retryCount++;
                     await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false); // Wait for 5 seconds before retrying.
                 }
@@ -259,7 +259,7 @@ namespace SysBot.Pokemon.Discord
                 }
                 catch (Exception ex)
                 {
-                    LogUtil.LogError($"Failed to send embed to channel '{c.Name}' (Attempt {retryCount + 1}): {ex.Message}", nameof(AddEchoChannel));
+                    LogUtil.LogError($"無法將嵌入發送到頻道 '{c.Name}' (Attempt {retryCount + 1}): {ex.Message}", nameof(AddEchoChannel));
                     retryCount++;
                     if (retryCount < maxRetries)
                         await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false); // Wait for a second before retrying.
@@ -292,7 +292,7 @@ namespace SysBot.Pokemon.Discord
         }
 
         [Command("echoInfo")]
-        [Summary("Dumps the special message (Echo) settings.")]
+        [Summary("轉儲特殊訊息 (Echo) 設置")]
         [RequireSudo]
         public async Task DumpEchoInfoAsync()
         {
@@ -302,40 +302,40 @@ namespace SysBot.Pokemon.Discord
 
         [Command("echoClear")]
         [Alias("rec")]
-        [Summary("Clears the special message echo settings in that specific channel.")]
+        [Summary("清除該特定通道中的特殊訊息回顯設置")]
         [RequireSudo]
         public async Task ClearEchosAsync()
         {
             var id = Context.Channel.Id;
             if (!Channels.TryGetValue(id, out var echo))
             {
-                await ReplyAsync("Not echoing in this channel.").ConfigureAwait(false);
+                await ReplyAsync("在這個頻道中沒有迴聲。").ConfigureAwait(false);
                 return;
             }
             EchoUtil.Forwarders.Remove(echo.Action);
             EchoUtil.RaidForwarders.Remove(echo.RaidAction);
             Channels.Remove(Context.Channel.Id);
             SysCordSettings.Settings.EchoChannels.RemoveAll(z => z.ID == id);
-            await ReplyAsync($"Echoes cleared from channel: {Context.Channel.Name}").ConfigureAwait(false);
+            await ReplyAsync($"頻道中的迴聲已清除: {Context.Channel.Name}").ConfigureAwait(false);
         }
 
         [Command("echoClearAll")]
         [Alias("raec")]
-        [Summary("Clears all the special message Echo channel settings.")]
+        [Summary("清除所有特殊訊息迴聲通道設定。")]
         [RequireSudo]
         public async Task ClearEchosAllAsync()
         {
             foreach (var l in Channels)
             {
                 var entry = l.Value;
-                await ReplyAsync($"Echoing cleared from {entry.ChannelName} ({entry.ChannelID}!").ConfigureAwait(false);
+                await ReplyAsync($"迴聲已清除 {entry.ChannelName} ({entry.ChannelID}!").ConfigureAwait(false);
                 EchoUtil.Forwarders.Remove(entry.Action);
             }
             EchoUtil.Forwarders.RemoveAll(y => Channels.Select(x => x.Value.Action).Contains(y));
             EchoUtil.RaidForwarders.RemoveAll(y => Channels.Select(x => x.Value.RaidAction).Contains(y));
             Channels.Clear();
             SysCordSettings.Settings.EchoChannels.Clear();
-            await ReplyAsync("Echoes cleared from all channels!").ConfigureAwait(false);
+            await ReplyAsync("所有頻道的迴聲已清除！").ConfigureAwait(false);
         }
 
         private RemoteControlAccess GetReference(IChannel channel) => new()

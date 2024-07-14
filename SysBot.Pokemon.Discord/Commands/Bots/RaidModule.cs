@@ -20,7 +20,7 @@ using static SysBot.Pokemon.SV.BotRaid.RotatingRaidBotSV;
 
 namespace SysBot.Pokemon.Discord.Commands.Bots
 {
-    [Summary("Generates and queues various silly trade additions")]
+    [Summary("生成并排队各种愚蠢的贸易添加")]
     public partial class RaidModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new()
     {
         private readonly PokeRaidHub<T> Hub = SysCord<T>.Runner.Hub;
@@ -28,7 +28,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
 
         [Command("raidinfo")]
         [Alias("ri", "rv")]
-        [Summary("Displays basic Raid Info of the provided seed.")]
+        [Summary("显示所提供种子的基本 Raid 信息。")]
         public async Task RaidSeedInfoAsync(
             string seedValue,
             int level,
@@ -42,13 +42,13 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             }
             catch (FormatException)
             {
-                await ReplyAsync("Invalid seed format. Please enter a valid seed.");
+                await ReplyAsync("种子格式无效。请输入有效的种子。");
                 return;
             }
             if (level == 7 && storyProgressLevel == 6 && string.IsNullOrEmpty(speciesName))
             {
                 var availableSpecies = string.Join(", ", SpeciesToGroupIDMap.Keys);
-                await ReplyAsync($"For 7★ raids, please specify the species name. Available species: {availableSpecies}").ConfigureAwait(false);
+                await ReplyAsync($"对于7★ 袭击，请注明物种名称。可用品种： {availableSpecies}").ConfigureAwait(false);
                 return;
             }
             // Check Compatibility of Difficulty and Story Progress Level
@@ -56,8 +56,8 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             if (!compatible)
             {
                 string requiredProgress = GetRequiredProgress(level);
-                await ReplyAsync($"The selected raid difficulty level ({level}★) is not compatible with your current story progress. " +
-                                 $"To access {level}★ raids, you need to have at least {requiredProgress} in the game's story.").ConfigureAwait(false);
+                await ReplyAsync($"所选的raid难度级别 ({level}★) 与您当前的故事进度不兼容。 " +
+                                 $"访问 {level}★ raids, 你至少需要有 {requiredProgress} 在游戏的故事中").ConfigureAwait(false);
                 return;
             }
 
@@ -69,7 +69,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
 
             if (isEvent && selectedMap != TeraRaidMapParent.Paldea)
             {
-                await ReplyAsync("Events can only be run in the Paldea map.");
+                await ReplyAsync("活动只能在Paldea地图中进行");
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             }
             else if (!string.IsNullOrEmpty(speciesName))
             {
-                await ReplyAsync("Species name not recognized or not associated with an active event. Please check the name and try again.");
+                await ReplyAsync("物种名称无法识别或与活动事件无关。请检查名称并重试。");
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
                 >= 1 and <= 5 => isEvent ? (TeraCrystalType)2 : 0,
                 6 => (TeraCrystalType)1,
                 7 => (TeraCrystalType)3,
-                _ => throw new ArgumentException("Invalid difficulty level.")
+                _ => throw new ArgumentException("难度级别无效。")
             };
 
             try
@@ -98,7 +98,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
                 var rewardsToShow = settings.EmbedToggles.RewardsToShow;
                 var (_, embed) = RaidInfoCommand(seedValue, (int)crystalType, selectedMap, storyProgressLevel, raidDeliveryGroupID, rewardsToShow, settings.EmbedToggles.MoveTypeEmojis, settings.EmbedToggles.CustomTypeEmojis, 0, isEvent);
 
-                var instructionMessage = await ReplyAsync("React with ✅ to add the raid to the queue.");
+                var instructionMessage = await ReplyAsync("使用 ✅ 进行反应，将 raid 添加到队列中。");
                 var message = await ReplyAsync(embed: embed);
                 var checkmarkEmoji = new Emoji("✅");
                 await message.AddReactionAsync(checkmarkEmoji);
@@ -130,7 +130,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
         [Command("banOT")]
         [Alias("ban")]
         [RequireSudo]
-        [Summary("Bans a user with the specified OT from participating in raids.")]
+        [Summary("禁止具有指定 OT 的用户参与raid。")]
         public async Task BanUserAsync(string ot)
         {
             // Load the player data from the file.
@@ -144,14 +144,14 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             // Check if there are duplicates.
             if (matchedPlayers.Count > 1)
             {
-                await ReplyAsync($"Multiple players with OT '{ot}' found. Ban skipped. Please review manually.");
+                await ReplyAsync($"找到多名玩家 '{ot}' . 禁令跳过了。请手动审核。");
                 return;
             }
 
             // If no player is found, notify and return.
             if (matchedPlayers.Count == 0)
             {
-                await ReplyAsync($"No player with OT '{ot}' found.");
+                await ReplyAsync($"没有找到玩家 '{ot}'");
                 return;
             }
 
@@ -162,19 +162,19 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             // Check if the NID is already in the ban list.
             if (Hub.Config.RotatingRaidSV.RaiderBanList.List.Any(x => x.ID == nidToBan))
             {
-                await ReplyAsync($"Player with OT '{ot}' is already banned.");
+                await ReplyAsync($"玩家 '{ot}' 已经被禁止.");
                 return;
             }
 
             Hub.Config.RotatingRaidSV.RaiderBanList.AddIfNew(new[] { GetReference(nidToBan, ot, "") });
 
-            await ReplyAsync($"Player with OT '{ot}' has been banned.");
+            await ReplyAsync($"玩家 '{ot}' 已经被禁止");
         }
 
         [Command("banNID")]
         [Alias("ban")]
         [RequireSudo]
-        [Summary("Bans a user with the specified NID from participating in raids.")]
+        [Summary("禁止具有指定 NID 的用户参与 raid.")]
         public async Task BanUserAsync(ulong nid, [Remainder] string comment)
         {
             var ot = string.Empty;
@@ -197,21 +197,21 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
 
         [Command("limitrequests")]
         [Alias("lr")]
-        [Summary("Sets the limit on the number of requests a user can make.")]
+        [Summary("设置用户可以发出的请求数量的限制。")]
         [RequireSudo]
-        public async Task SetLimitRequestsAsync([Summary("The new limit for requests. Set to 0 to disable.")] int newLimit)
+        public async Task SetLimitRequestsAsync([Summary("新的请求限制。设置为 0 以禁用。")] int newLimit)
         {
             var settings = Hub.Config.RotatingRaidSV.RaidSettings;
             settings.LimitRequests = newLimit;
 
-            await ReplyAsync($"LimitRequests updated to {newLimit}.").ConfigureAwait(false);
+            await ReplyAsync($"限制请求更新为 {newLimit}.").ConfigureAwait(false);
         }
 
         [Command("limitrequeststime")]
         [Alias("lrt")]
-        [Summary("Sets the time users must wait once their request limit is reached.")]
+        [Summary("设置达到请求限制后用户必须等待的时间。")]
         [RequireSudo]
-        public async Task SetLimitRequestsTimeAsync([Summary("The new time in minutes. Set to 0 to disable.")] int newTime)
+        public async Task SetLimitRequestsTimeAsync([Summary("新时间以分钟为单位。设置为 0 以禁用。")] int newTime)
         {
             var settings = Hub.Config.RotatingRaidSV.RaidSettings;
             settings.LimitRequestsTime = newTime;
@@ -221,7 +221,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
 
         [Command("addlimitbypass")]
         [Alias("alb")]
-        [Summary("Adds a user or role to the bypass list for request limits.")]
+        [Summary("将用户或角色添加到请求限制的绕过列表。.")]
         [RequireSudo]
         public async Task AddBypassLimitAsync([Remainder] string mention)
         {
@@ -258,7 +258,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
         }
 
         [Command("repeek")]
-        [Summary("Take and send a screenshot from the currently configured Switch.")]
+        [Summary("从当前配置的交换机获取并发送屏幕截图。")]
         [RequireOwner]
         public async Task RePeek()
         {
@@ -906,7 +906,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
 
         [Command("raidQueueClear")]
         [Alias("rqc")]
-        [Summary("Removes the raid added by the user.")]
+        [Summary("删除用户添加的raid。")]
         public async Task RemoveOwnRaidParam()
         {
             var userId = Context.User.Id;
@@ -916,27 +916,27 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             var userRaid = list.FirstOrDefault(r => r.RequestedByUserID == userId && r.AddedByRACommand);
             if (userRaid == null)
             {
-                await ReplyAsync("You don't have a raid added.").ConfigureAwait(false);
+                await ReplyAsync("您没有添加raid。").ConfigureAwait(false);
                 return;
             }
 
             // Prevent canceling if the raid is up next
             if (userRaid.RaidUpNext)
             {
-                await ReplyAsync("Your raid request is up next and cannot be canceled at this time.").ConfigureAwait(false);
+                await ReplyAsync("您的raid请求即将提交，目前无法取消。").ConfigureAwait(false);
                 return;
             }
 
             // Remove the raid if it's not up next
             list.Remove(userRaid);
             await Context.Message.DeleteAsync().ConfigureAwait(false);
-            var msg = $"Cleared your Raid from the queue.";
+            var msg = $"从队列中清除你的Raid";
             await ReplyAsync(msg).ConfigureAwait(false);
         }
 
         [Command("removeRaidParams")]
         [Alias("rrp")]
-        [Summary("Removes a raid parameter.")]
+        [Summary("删除raid参数")]
         [RequireSudo]
         public async Task RemoveRaidParam([Summary("Seed Index")] int index)
         {
@@ -945,16 +945,16 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             {
                 var raid = list[index];
                 list.RemoveAt(index);
-                var msg = $"Raid for {raid.Title} | {raid.Seed:X8} has been removed!";
+                var msg = $"Raid for {raid.Title} | {raid.Seed:X8} 已被删除!";
                 await ReplyAsync(msg).ConfigureAwait(false);
             }
             else
-                await ReplyAsync("Invalid raid parameter index.").ConfigureAwait(false);
+                await ReplyAsync("无效的 raid 参数索引。").ConfigureAwait(false);
         }
 
         [Command("toggleRaidParams")]
         [Alias("trp")]
-        [Summary("Toggles raid parameter.")]
+        [Summary("切换 RAID 参数。")]
         [RequireSudo]
         public async Task ToggleRaidParam([Summary("Seed Index")] int index)
         {
@@ -968,12 +968,12 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
                 await ReplyAsync(msg).ConfigureAwait(false);
             }
             else
-                await ReplyAsync("Invalid raid parameter Index.").ConfigureAwait(false);
+                await ReplyAsync("无效的 raid 参数索引。").ConfigureAwait(false);
         }
 
         [Command("togglecodeRaidParams")]
         [Alias("tcrp")]
-        [Summary("Toggles code raid parameter.")]
+        [Summary("切换代码 raid 参数。")]
         [RequireSudo]
         public async Task ToggleCodeRaidParam([Summary("Seed Index")] int index)
         {
@@ -987,12 +987,12 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
                 await ReplyAsync(msg).ConfigureAwait(false);
             }
             else
-                await ReplyAsync("Invalid raid parameter Index.").ConfigureAwait(false);
+                await ReplyAsync("无效的 raid 参数索引。").ConfigureAwait(false);
         }
 
         [Command("changeRaidParamTitle")]
         [Alias("crpt")]
-        [Summary("Changes the title of a  raid parameter.")]
+        [Summary("更改 raid 参数的标题。")]
         [RequireSudo]
         public async Task ChangeRaidParamTitle([Summary("Seed Index")] int index, [Summary("Title")] string title)
         {
@@ -1001,16 +1001,16 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             {
                 var raid = list[index];
                 raid.Title = title;
-                var msg = $"Raid Title for {raid.Title} | {raid.Seed:X8} has been changed to: {title}!";
+                var msg = $"Raid标题 for {raid.Title} | {raid.Seed:X8} 已修改为: {title}!";
                 await ReplyAsync(msg).ConfigureAwait(false);
             }
             else
-                await ReplyAsync("Invalid raid parameter Index.").ConfigureAwait(false);
+                await ReplyAsync("无效的 raid 参数索引。").ConfigureAwait(false);
         }
 
         [Command("viewraidList")]
         [Alias("vrl", "rotatinglist")]
-        [Summary("Prints the raids in the current collection.")]
+        [Summary("打印当前集合中的raid。")]
         public async Task GetRaidListAsync()
         {
             var list = Hub.Config.RotatingRaidSV.ActiveRaids;
@@ -1018,7 +1018,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             int fields = (int)Math.Ceiling((double)count / 15);
             var embed = new EmbedBuilder
             {
-                Title = "Raid List"
+                Title = "Raid 列表"
             };
             for (int i = 0; i < fields; i++)
             {
@@ -1031,7 +1031,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
                     int paramNumber = j;
                     fieldBuilder.AppendLine($"{paramNumber}.) {raid.Title} - {raid.Seed} - Status: {(raid.ActiveInRotation ? "Active" : "Inactive")}");
                 }
-                embed.AddField($"Raid List - Part {i + 1}", fieldBuilder.ToString(), false);
+                embed.AddField($"Raid列表 - Part {i + 1}", fieldBuilder.ToString(), false);
             }
             await ReplyAsync($"These are the raids currently in the list (total: {count}):", embed: embed.Build()).ConfigureAwait(false);
         }
@@ -1063,37 +1063,37 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
             var embed = new EmbedBuilder();
             List<string> cmds = new()
             {
-                "$ban - Ban a user from raids via NID. [Command] [OT] - Sudo only command.\n",
-                "$vrl - View all raids in the list.\n",
-                "$arp - Add parameter to the collection.\nEx: [Command] [Index] [Species] [Difficulty]\n",
-                "$rrp - Remove parameter from the collection.\nEx: [Command] [Index]\n",
-                "$trp - Toggle the parameter as Active/Inactive in the collection.\nEx: [Command] [Index]\n",
-                "$tcrp - Toggle the parameter as Coded/Uncoded in the collection.\nEx: [Command] [Index]\n",
-                "$trpk - Set a PartyPK for the parameter via a showdown set.\nEx: [Command] [Index] [ShowdownSet]\n",
-                "$crpt - Set the title for the parameter.\nEx: [Command] [Index]"
+                "$ban -通过 NID 禁止用户进行raid。 [命令] [OT] - 仅 Sudo 命令\n",
+                "$vrl - 查看列表中的所有raid。\n",
+                "$arp - 将参数添加到集合中\n例如：[命令] [索引] [种类] [难度]\n",
+                "$rrp - 从集合中删除参数。\n例如：[命令] [索引]\n",
+                "$trp - 在集合中将参数切换为活动/非活动。\n例如：[命令] [索引]\n",
+                "$tcrp - 在集合中将参数切换为编码/未编码。\n例如：[命令] [索引]\n",
+                "$trpk - 通过摊牌设置参数的 PartyPK\n例如：[命令] [索引] [ShowdownSet]\n",
+                "$crpt - 设置参数的标题。\n例如：[命令] [索引]"
             };
             string msg = string.Join("", cmds.ToList());
             embed.AddField(x =>
             {
-                x.Name = "Raid Help Commands";
+                x.Name = "Raid 帮助命令";
                 x.Value = msg;
                 x.IsInline = false;
             });
-            await ReplyAsync("Here's your raid help!", embed: embed.Build()).ConfigureAwait(false);
+            await ReplyAsync("这是你的raid帮助！", embed: embed.Build()).ConfigureAwait(false);
         }
 
         [Command("unbanrotatingraider")]
         [Alias("ubrr")]
-        [Summary("Removes the specificed NID from the banlist for Raids in SV.")]
+        [Summary("从 SV 中的 Raids 禁止列表中删除指定的 NID。")]
         [RequireSudo]
-        public async Task UnbanRotatingRaider([Summary("Removes the specificed NID from the banlist for Raids in SV.")] string nid)
+        public async Task UnbanRotatingRaider([Summary("从 SV 中的 Raids 禁止列表中删除指定的 NID。")] string nid)
         {
             var list = Hub.Config.RotatingRaidSV.RaiderBanList.List.ToArray();
-            string msg = $"{Context.User.Mention} no user found with that NID.";
+            string msg = $"{Context.User.Mention} 没有找到具有该 NID 的用户。";
             for (int i = 0; i < list.Length; i++)
                 if ($"{list[i].ID}".Equals(nid))
                 {
-                    msg = $"{Context.User.Mention} user {list[i].Name} - {list[i].ID} has been unbanned.";
+                    msg = $"{Context.User.Mention} 用户 {list[i].Name} - {list[i].ID} 已经被解禁了。";
                     Hub.Config.RotatingRaidSV.RaiderBanList.List.ToList().Remove(list[i]);
                 }
             await ReplyAsync(msg).ConfigureAwait(false);
@@ -1103,7 +1103,7 @@ namespace SysBot.Pokemon.Discord.Commands.Bots
         {
             ID = id,
             Name = name,
-            Comment = "Banned on " + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") + " UTC" + $"({comment})"
+            Comment = "禁止于 " + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") + " UTC" + $"({comment})"
         };
 
         private static T? GetRequest(Download<PKM> dl)

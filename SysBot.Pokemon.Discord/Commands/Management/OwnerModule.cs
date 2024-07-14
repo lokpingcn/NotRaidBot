@@ -13,7 +13,7 @@ namespace SysBot.Pokemon.Discord
         private readonly ExtraCommandUtil<T> Util = new();
 
         [Command("addSudo")]
-        [Summary("Adds mentioned user to global sudo")]
+        [Summary("將提到的用戶加入全域 sudo")]
         [RequireOwner]
         public async Task SudoUsers([Remainder] string _)
         {
@@ -24,7 +24,7 @@ namespace SysBot.Pokemon.Discord
         }
 
         [Command("removeSudo")]
-        [Summary("Removes mentioned user from global sudo")]
+        [Summary("從全域 sudo 中刪除提到的用戶")]
         [RequireOwner]
         public async Task RemoveSudoUsers([Remainder] string _)
         {
@@ -35,7 +35,7 @@ namespace SysBot.Pokemon.Discord
         }
 
         [Command("addChannel")]
-        [Summary("Adds a channel to the list of channels that are accepting commands.")]
+        [Summary("將通道新增至正在接受命令的通道清單中。")]
         [RequireOwner]
         public async Task AddChannel()
         {
@@ -45,7 +45,7 @@ namespace SysBot.Pokemon.Discord
         }
 
         [Command("removeChannel")]
-        [Summary("Removes a channel from the list of channels that are accepting commands.")]
+        [Summary("從正在接受命令的通道清單中刪除通道。")]
         [RequireOwner]
         public async Task RemoveChannel()
         {
@@ -56,7 +56,7 @@ namespace SysBot.Pokemon.Discord
 
         [Command("leave")]
         [Alias("bye")]
-        [Summary("Leaves the current server.")]
+        [Summary("離開目前伺服器。")]
         [RequireOwner]
         public async Task Leave()
         {
@@ -66,13 +66,13 @@ namespace SysBot.Pokemon.Discord
 
         [Command("leaveguild")]
         [Alias("lg")]
-        [Summary("Leaves guild based on supplied ID.")]
+        [Summary("根據提供的 ID 離開公會。")]
         [RequireOwner]
         public async Task LeaveGuild(string userInput)
         {
             if (!ulong.TryParse(userInput, out ulong id))
             {
-                await ReplyAsync("Please provide a valid Guild ID.").ConfigureAwait(false);
+                await ReplyAsync("請提供有效的公會 ID。").ConfigureAwait(false);
                 return;
             }
             var guild = Context.Client.Guilds.FirstOrDefault(x => x.Id == id);

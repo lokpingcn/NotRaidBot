@@ -14,7 +14,7 @@ namespace SysBot.Pokemon.Discord
     // Copyright 2017, Christopher F. <foxbot@protonmail.com>
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
-        private const string detail = "I am an Open Source RaidBot powered by PKHeX.Core and other open-source software.";
+        private const string detail = "我是一个由 PKHeX.Core 和其他开源软件提供支持的开源 RaidBot。";
         public const string version = NotRaidBot.Version;
         private const string support = NotRaidBot.Repo;
         private const ulong DisallowedUserId = 195756980873199618;
@@ -25,7 +25,7 @@ namespace SysBot.Pokemon.Discord
         {
             if (Context.User.Id == DisallowedUserId)
             {
-                await ReplyAsync("We don't let shady people use this command.").ConfigureAwait(false);
+                await ReplyAsync("我们不会让可疑的人使用这个命令。").ConfigureAwait(false);
                 return;
             }
             var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);
@@ -37,30 +37,28 @@ namespace SysBot.Pokemon.Discord
                 ImageUrl = programIconUrl
             };
 
-            builder.AddField("# __Bot Info__",
-                $"- **Version**: {version}\n" +
-                $"- [Download NotRaidBot]({support})\n- [Join Our Discord!](https://notpaldea.net)\n" +
-                $"- {Format.Bold("Owner")}: {app.Owner} ({app.Owner.Id})\n" +
-                $"- {Format.Bold("Uptime")}: {GetUptime()}\n" +
-                $"- {Format.Bold("Core Version")}: {GetVersionInfo("PKHeX.Core")}\n" +
-                $"- {Format.Bold("AutoLegality Version")}: {GetVersionInfo("PKHeX.Core.AutoMod")}\n"
+            builder.AddField("# __Bot 信息__",
+                $"- **版本**: {version}\n" +
+                $"- {Format.Bold("所有者")}: {app.Owner} ({app.Owner.Id})\n" +
+                $"- {Format.Bold("运行时间")}: {GetUptime()}\n" +
+                $"- {Format.Bold("内核版本")}: {GetVersionInfo("PKHeX.Core")}\n" +
+                $"- {Format.Bold("自动合法性版本")}: {GetVersionInfo("PKHeX.Core.AutoMod")}\n"
                 );
 
-            builder.AddField("Stats",
-                $"- {Format.Bold("Guilds")}: {Context.Client.Guilds.Count}\n" +
-                $"- {Format.Bold("Channels")}: {Context.Client.Guilds.Sum(g => g.Channels.Count)}\n" +
-                $"- {Format.Bold("Users")}: {Context.Client.Guilds.Sum(g => g.MemberCount)}\n" +
-                $"{Format.Bold($"\nVisit [NotPaldea.net]({support}) for more information.")}\n"
+            builder.AddField("频道數據",
+                $"- {Format.Bold("行會")}: {Context.Client.Guilds.Count}\n" +
+                $"- {Format.Bold("頻道")}: {Context.Client.Guilds.Sum(g => g.Channels.Count)}\n" +
+                $"- {Format.Bold("用户")}: {Context.Client.Guilds.Sum(g => g.MemberCount)}\n"
                 );
 
-            await ReplyAsync("Here's a bit about me!", embed: builder.Build()).ConfigureAwait(false);
+            await ReplyAsync("这里是关于我的信息", embed: builder.Build()).ConfigureAwait(false);
         }
 
         private static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString(@"dd\.hh\:mm\:ss");
 
         private static string GetVersionInfo(string assemblyName)
         {
-            const string _default = "Unknown";
+            const string _default = "未知";
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             var assembly = assemblies.FirstOrDefault(x => x.GetName().Name == assemblyName);
             if (assembly is null)

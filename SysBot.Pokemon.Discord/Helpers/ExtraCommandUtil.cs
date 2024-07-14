@@ -43,7 +43,7 @@ namespace SysBot.Pokemon.Discord
                 embed.AddField(x =>
                 {
                     x.Name = "Missing \"Add Reactions\" Permission";
-                    x.Value = "Displaying only the first page of the list due to embed field limits.";
+                    x.Value = "由於嵌入欄位限制，僅顯示清單的第一頁。";
                 });
             }
 
@@ -159,7 +159,7 @@ namespace SysBot.Pokemon.Discord
         {
             var sw = new Stopwatch();
             IEmote reaction = new Emoji("👍");
-            var msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username}, please react to the attached emoji in order to confirm you're not using a script.").ConfigureAwait(false);
+            var msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username},請對附加的表情符號做出反應，以確認您沒有使用腳本").ConfigureAwait(false);
             await msg.AddReactionAsync(reaction).ConfigureAwait(false);
 
             sw.Start();
@@ -242,7 +242,7 @@ namespace SysBot.Pokemon.Discord
                     pageContent.Add(string.Join(entry.Contains(',') ? ", " : entry.Contains('|') ? " | " : "\n", splice));
                 }
             }
-            else pageContent.Add(entry == "" ? "No results found." : entry);
+            else pageContent.Add(entry == "" ? "未找到結果。" : entry);
             return pageContent;
         }
 

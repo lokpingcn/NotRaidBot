@@ -21,14 +21,14 @@ namespace SysBot.Pokemon.Discord
 
             // Check if this user is a Guild User, which is the only context where roles exist
             if (context.User is not SocketGuildUser gUser)
-                return Task.FromResult(PreconditionResult.FromError("You must be in a guild to run this command."));
+                return Task.FromResult(PreconditionResult.FromError("您必須在公會中才能執行此命令。"));
 
             // If this command was executed by a user with the appropriate role, return a success
             if (gUser.Roles.Any(r => r.Name == _name))
                 return Task.FromResult(PreconditionResult.FromSuccess());
 
             // Since it wasn't, fail
-            return Task.FromResult(PreconditionResult.FromError($"You must have a role named {_name} to run this command."));
+            return Task.FromResult(PreconditionResult.FromError($"您必須有一個指定的角色 {_name} 来運行這個命令."));
         }
     }
 }
