@@ -11,16 +11,16 @@ namespace SysBot.Pokemon
         protected const string Operation = nameof(Operation);
         private const string Debug = nameof(Debug);
 
-        [Category(FeatureToggle), Description("When enabled, the bot will press the B button occasionally when it is not processing anything (to avoid sleep).")]
+        [Category(FeatureToggle), Description("啟用後，機器人會在不處理任何內容時偶爾按下 B 按鈕（以避免休眠）。")]
         public bool AntiIdle { get; set; }
 
-        [Category(FeatureToggle), Description("Enables text logs. Restart to apply changes.")]
+        [Category(FeatureToggle), Description("啟用文字日誌。重新啟動以套用變更。")]
         public bool LoggingEnabled { get; set; } = true;
 
-        [Category(FeatureToggle), Description("Maximum number of old text log files to retain. Set this to <= 0 to disable log cleanup. Restart to apply changes.")]
+        [Category(FeatureToggle), Description("要保留的舊文字日誌檔案的最大數量。將其設為 <= 0 以停用日誌清理。重新啟動以套用變更。")]
         public int MaxArchiveFiles { get; set; } = 14;
 
-        [Category(Debug), Description("Skips creating bots when the program is started; helpful for testing integrations.")]
+        [Category(Debug), Description("程式啟動時跳過創建機器人；有助於測試整合。")]
         public bool SkipConsoleBotCreation { get; set; }
     }
 }

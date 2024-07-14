@@ -85,7 +85,7 @@ namespace SysBot.Pokemon.SV.BotRaid
             if (Settings.RaidSettings.GenerateRaidsFromFile)
             {
                 GenerateSeedsFromFile();
-                Log("Done.");
+                Log("完成。");
                 Settings.RaidSettings.GenerateRaidsFromFile = false;
             }
 
@@ -97,22 +97,22 @@ namespace SysBot.Pokemon.SV.BotRaid
 
             if (Settings.ActiveRaids.Count < 1)
             {
-                Log("ActiveRaids cannot be 0. Please setup your parameters for the raid(s) you are hosting.");
+                Log("ActiveRaids 不能為 0。請設置您主持的突襲的參數。");
                 return;
             }
 
             if (Settings.RaidSettings.TimeToWait is < 0 or > 180)
             {
-                Log("Time to wait must be between 0 and 180 seconds.");
+                Log("等待時間必須介於 0 和 180 秒之間。");
                 return;
             }
 
             try
             {
-                Log("Identifying trainer data of the host console.");
+                Log("正在識別主機主機的訓練師數據。");
                 HostSAV = await IdentifyTrainer(token).ConfigureAwait(false);
                 await InitializeHardware(Settings, token).ConfigureAwait(false);
-                Log("Starting main RotatingRaidBot loop.");
+                Log("開始主要的 RotatingRaidBot 迴圈。");
                 await InnerLoop(token).ConfigureAwait(false);
             }
             catch (Exception e)
@@ -123,7 +123,7 @@ namespace SysBot.Pokemon.SV.BotRaid
             {
                 SaveSeeds();
             }
-            Log($"Ending {nameof(RotatingRaidBotSV)} loop.");
+            Log($"結束 {nameof(RotatingRaidBotSV)} 迴圈。");
             await HardStop().ConfigureAwait(false);
         }
 
@@ -134,7 +134,7 @@ namespace SysBot.Pokemon.SV.BotRaid
             await Task.Delay(2_000, t).ConfigureAwait(false);
             if (!t.IsCancellationRequested)
             {
-                Log("Restarting the inner loop.");
+                Log("重新啟動內部迴圈。");
                 await InnerLoop(t).ConfigureAwait(false);
             }
         }
@@ -185,12 +185,12 @@ namespace SysBot.Pokemon.SV.BotRaid
             if (!File.Exists(rotationpath))
             {
                 File.WriteAllText(rotationpath, "000091EC-Kricketune-3-6,0000717F-Seviper-3-6");
-                Log("Creating a default raidsv.txt file, skipping generation as file is empty.");
+                Log("正在創建預設的 raidsv.txt 檔案，因為檔案是空的所以跳過生成。\"");
                 return;
             }
 
             if (!File.Exists(rotationpath))
-                Log("raidsv.txt not present, skipping parameter generation.");
+                Log("raidsv.txt 不存在，跳過參數生成。");
 
             BaseDescription = string.Empty;
             var prevpath = "bodyparam.txt";
@@ -276,7 +276,7 @@ namespace SysBot.Pokemon.SV.BotRaid
                 // Check if the split result has exactly 4 parts
                 if (div.Length != 4)
                 {
-                    Log($"Error processing entry: {moninfo[i]}. Expected 4 parts but found {div.Length}. Skipping this entry.");
+                    Log($"處理條目錯誤：{moninfo[i]}。預期有4部分，但找到了{div.Length}部分。跳過此條目。");
                     continue; // Skip processing this entry and move to the next one
                 }
 
@@ -286,14 +286,14 @@ namespace SysBot.Pokemon.SV.BotRaid
 
                 if (!int.TryParse(div[2], out int difficultyLevel))
                 {
-                    Log($"Unable to parse difficulty level for entry: {moninfo[i]}");
+                    Log($"無法解析條目的難度等級：{moninfo[i]}");
                     continue;
                 }
 
                 // Extract and convert the StoryProgressLevel
                 if (!int.TryParse(div[3], out int storyProgressLevelFromSeed))
                 {
-                    Log($"Unable to parse StoryProgressLevel for entry: {moninfo[i]}");
+                    Log($"無法解析條目的故事進度等級：{moninfo[i]}");
                     continue;
                 }
 
@@ -323,7 +323,7 @@ namespace SysBot.Pokemon.SV.BotRaid
                 Settings.ActiveRaids.Add(param);
 
                 // Log the raid parameter generation
-                Log($"Parameters generated from text file for {montitle}.");
+                Log($"從文本文件生成了 {montitle} 的參數。");
             }
         }
 
@@ -340,10 +340,10 @@ namespace SysBot.Pokemon.SV.BotRaid
                 if (RaidCount == 0)
                 {
                     TodaySeed = BitConverter.ToUInt64(await SwitchConnection.ReadBytesAbsoluteAsync(RaidBlockPointerP, 8, token).ConfigureAwait(false), 0);
-                    Log($"Today Seed: {TodaySeed:X8}");
+                    Log($"今天的 Seed: {TodaySeed:X8}");
                 }
 
-                Log($"Preparing parameter for {Settings.ActiveRaids[RotationCount].Species}");
+                Log($"準備參數中 {Settings.ActiveRaids[RotationCount].Species}");
                 await ReadRaids(token).ConfigureAwait(false);
 
                 var currentSeed = BitConverter.ToUInt64(await SwitchConnection.ReadBytesAbsoluteAsync(RaidBlockPointerP, 8, token).ConfigureAwait(false), 0);
@@ -351,15 +351,15 @@ namespace SysBot.Pokemon.SV.BotRaid
                 {
                     if (TodaySeed != currentSeed)
                     {
-                        Log($"Current Today Seed {currentSeed:X8} does not match Starting Today Seed: {TodaySeed:X8}.\nAttempting to override Today Seed...");
+                        Log($"當前的今日種子 {currentSeed:X8} 與起始的今日種子 {TodaySeed:X8} 不符。\n嘗試覆蓋今日種子...");
                         TodaySeed = currentSeed;
                         await OverrideTodaySeed(token).ConfigureAwait(false);
-                        Log("Today Seed has been overridden with the current seed.");
+                        Log("今日種子已經被當前的種子覆蓋。");
                     }
 
                     if (LobbyError >= 2)
                     {
-                        string? msg = $"Failed to create a lobby {LobbyError} times.\n";
+                        string? msg = $"嘗試建立大廳失敗 {LobbyError} 次。\n";
                         Log(msg);
                         await CloseGame(Hub.Config, token).ConfigureAwait(false);
                         await StartGameRaid(Hub.Config, token).ConfigureAwait(false);
@@ -381,7 +381,7 @@ namespace SysBot.Pokemon.SV.BotRaid
                 else if (prepareResult == 0)
                 {
                     // Preparation failed, reboot the game
-                    Log("Failed to prepare the raid, rebooting the game.");
+                    Log("準備突擊戰失敗，重新啟動遊戲。");
                     await ReOpenGame(Hub.Config, token).ConfigureAwait(false);
                     continue;
                 }
@@ -406,17 +406,17 @@ namespace SysBot.Pokemon.SV.BotRaid
                             var code = await GetRaidCode(token).ConfigureAwait(false);
                             if (user != null)
                             {
-                                await user.SendMessageAsync($"Your Raid Code is **{code}**").ConfigureAwait(false);
+                                await user.SendMessageAsync($"您的突襲代碼是 **{code}**").ConfigureAwait(false);
                             }
                             foreach (var mentionedUser in mentionedUsers)
                             {
-                                await mentionedUser.SendMessageAsync($"The Raid Code for the private raid you were invited to by {user?.Username ?? "the host"} is **{code}**").ConfigureAwait(false);
+                                await mentionedUser.SendMessageAsync($"您被 {user?.Username ?? "主持人"} 邀請參加的私人突襲的代碼是 **{code}**").ConfigureAwait(false);
                             }
                         }
                         catch (Discord.Net.HttpException ex)
                         {
                             // Handle exception (e.g., log the error or send a message to a logging channel)
-                            Log($"Failed to send DM to the user or mentioned users. They might have DMs turned off. Exception: {ex.Message}");
+                            Log($"無法發送私訊給使用者或被提及的使用者。可能是因為他們已關閉私訊功能。錯誤訊息: {ex.Message}");
                         }
                     }
                 }
@@ -437,13 +437,13 @@ namespace SysBot.Pokemon.SV.BotRaid
 
                     if (!await IsOnOverworld(OverworldOffset, token).ConfigureAwait(false))
                     {
-                        Log("Something went wrong, attempting to recover.");
+                        Log("出現問題，嘗試恢復中。");
                         await ReOpenGame(Hub.Config, token).ConfigureAwait(false);
                         continue;
                     }
 
                     // Clear trainer OTs.
-                    Log("Clearing stored OTs");
+                    Log("清除存儲的原始訓練家數據");
                     for (int i = 0; i < 3; i++)
                     {
                         List<long> ptr = new(Offsets.Trader2MyStatusPointer);
@@ -458,19 +458,19 @@ namespace SysBot.Pokemon.SV.BotRaid
                     break;
             }
             if (Settings.RaidSettings.TotalRaidsToHost > 0 && raidsHosted != 0)
-                Log("Total raids to host has been met.");
+                Log("已達到要主持的總團數。");
         }
 
         public override async Task HardStop()
         {
             try
             {
-                Directory.Delete("cache", true);
+                Directory.Delete("缓存", true);
             }
             catch (Exception)
             { }
             Settings.ActiveRaids.RemoveAll(p => p.AddedByRACommand);
-            Settings.ActiveRaids.RemoveAll(p => p.Title == "Mystery Shiny Raid");
+            Settings.ActiveRaids.RemoveAll(p => p.Title == "神秘閃光團戰");
             await CleanExit(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -486,7 +486,7 @@ namespace SysBot.Pokemon.SV.BotRaid
                 if (seed == 0)
                 {
                     SeedIndexToReplace = i;
-                    Log($"Raid Den Located at {i} in Paldea.");
+                    Log($"位於帕底亞地區的 {i} 號團戰洞穴。");
                     return;
                 }
             }
@@ -498,7 +498,7 @@ namespace SysBot.Pokemon.SV.BotRaid
                 if (seed == 0)
                 {
                     SeedIndexToReplace = i;
-                    Log($"Raid Den Located at {i} in Kitakami.");
+                    Log($"位於北上鄉的 {i} 號團戰洞穴。");
                     IsKitakami = true;
                     return;
                 }
@@ -512,12 +512,12 @@ namespace SysBot.Pokemon.SV.BotRaid
                 if (seed == 0)
                 {
                     SeedIndexToReplace = i - 1;  // Adjusting the index by subtracting one
-                    Log($"Raid Den Located at {i} in Blueberry.");
+                    Log($"位於藍莓學院的 {i} 號團戰洞穴。");
                     IsBlueberry = true;
                     return;
                 }
             }
-            Log($"Index not located.");
+            Log($"索引未找到。");
         }
 
         private async Task CompleteRaid(CancellationToken token)
@@ -528,12 +528,12 @@ namespace SysBot.Pokemon.SV.BotRaid
 
                 if (!await CheckIfConnectedToLobbyAndLog(token))
                 {
-                    throw new Exception("Not connected to lobby");
+                    throw new Exception("未連接到大廳");
                 }
 
                 if (!await EnsureInRaid(token))
                 {
-                    throw new Exception("Not in raid");
+                    throw new Exception("未在團體戰中");
                 }
 
                 if (!Settings.EmbedToggles.AnimatedScreenshot)
@@ -545,32 +545,32 @@ namespace SysBot.Pokemon.SV.BotRaid
                 var lobbyTrainersFinal = new List<(ulong, RaidMyStatus)>();
                 if (!await UpdateLobbyTrainersFinal(lobbyTrainersFinal, trainers, token))
                 {
-                    throw new Exception("Failed to update lobby trainers");
+                    throw new Exception("無法更新大廳訓練師");
                 }
 
                 if (!await HandleDuplicatesAndEmbeds(lobbyTrainersFinal, token))
                 {
-                    throw new Exception("Failed to handle duplicates and embeds");
+                    throw new Exception("無法處理重複和嵌入");
                 }
 
                 await Task.Delay(10_000, token).ConfigureAwait(false);
 
                 if (!await ProcessBattleActions(token))
                 {
-                    throw new Exception("Failed to process battle actions");
+                    throw new Exception("無法處理戰鬥行動");
                 }
 
                 bool isRaidCompleted = await HandleEndOfRaidActions(token);
                 if (!isRaidCompleted)
                 {
-                    throw new Exception("Raid not completed");
+                    throw new Exception("團體戰未完成");
                 }
 
                 await FinalizeRaidCompletion(trainers, isRaidCompleted, token);
             }
             catch (Exception ex)
             {
-                Log($"Error occurred during raid: {ex.Message}");
+                Log($"在團體戰期間發生錯誤: {ex.Message}");
                 await PerformRebootAndReset(token);
             }
         }
@@ -579,8 +579,8 @@ namespace SysBot.Pokemon.SV.BotRaid
         {
             EmbedBuilder embed = new()
             {
-                Title = "Bot Reset",
-                Description = "The bot encountered an issue and is currently resetting. Please stand by.",
+                Title = "機器人重置",
+                Description = "機器人遇到問題，目前正在重置中。請稍候。",
                 Color = Discord.Color.Red,
                 ThumbnailUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/imgs/x.png"
             };
@@ -592,7 +592,7 @@ namespace SysBot.Pokemon.SV.BotRaid
 
             if (!t.IsCancellationRequested)
             {
-                Log("Restarting the inner loop.");
+                Log("重新啟動內部迴圈。");
                 await InnerLoop(t).ConfigureAwait(false);
             }
         }
@@ -603,19 +603,19 @@ namespace SysBot.Pokemon.SV.BotRaid
             {
                 if (await IsConnectedToLobby(token).ConfigureAwait(false))
                 {
-                    Log("Preparing for battle!");
+                    Log("準備戰鬥！");
                     return true;
                 }
                 else
                 {
-                    Log("Not connected to lobby, reopening game.");
+                    Log("未連接到大廳，重新開啟遊戲。");
                     await ReOpenGame(Hub.Config, token);
                     return false;
                 }
             }
-            catch (Exception ex) // Catch the appropriate exception
+            catch (Exception ex) // 捕獲適當的異常
             {
-                Log($"Error checking lobby connection: {ex.Message}, reopening game.");
+                Log($"檢查大廳連接時發生錯誤：{ex.Message}，重新開啟遊戲。");
                 await ReOpenGame(Hub.Config, token);
                 return false;
             }
@@ -629,14 +629,14 @@ namespace SysBot.Pokemon.SV.BotRaid
             {
                 if (linkedToken.IsCancellationRequested || (DateTime.Now - startTime).TotalMinutes > 5)
                 {
-                    Log("Timeout reached or cancellation requested, reopening game.");
+                    Log("已達到超時或取消請求，重新開啟遊戲。");
                     await ReOpenGame(Hub.Config, linkedToken);
                     return false;
                 }
 
                 if (!await IsConnectedToLobby(linkedToken).ConfigureAwait(false))
                 {
-                    Log("Lost connection to lobby, reopening game.");
+                    Log("與大廳的連接中斷，重新開啟遊戲。");
                     await ReOpenGame(Hub.Config, linkedToken);
                     return false;
                 }
@@ -679,26 +679,26 @@ namespace SysBot.Pokemon.SV.BotRaid
 
                     if (!playerData.TryGetValue(nid, out var info))
                     {
-                        // New player
+                        // 新玩家
                         playerData[nid] = new PlayerInfo { OT = trainer.OT, RaidCount = 1 };
-                        Log($"New Player: {trainer.OT} | TID: {trainer.DisplayTID} | NID: {nid}.");
+                        Log($"新玩家：{trainer.OT} | TID：{trainer.DisplayTID} | NID：{nid}。");
                     }
                     else
                     {
-                        // Returning player
+                        // 回歸玩家
                         info.RaidCount++;
-                        playerData[nid] = info; // Update the info back to the dictionary.
-                        Log($"Returning Player: {trainer.OT} | TID: {trainer.DisplayTID} | NID: {nid} | Raids: {info.RaidCount}");
+                        playerData[nid] = info; // 更新資訊至字典中
+                        Log($"回歸玩家：{trainer.OT} | TID：{trainer.DisplayTID} | NID：{nid} | 參加的團戰數量：{info.RaidCount}");
                     }
                 }
                 catch (IndexOutOfRangeException ex)
                 {
-                    Log($"Index out of range exception caught: {ex.Message}");
+                    Log($"捕捉到索引超出範圍的例外情況：{ex.Message}");
                     return false;
                 }
                 catch (Exception ex)
                 {
-                    Log($"An unknown error occurred: {ex.Message}");
+                    Log($"發生未知錯誤：{ex.Message}");
                     return false;
                 }
             }
@@ -714,8 +714,8 @@ namespace SysBot.Pokemon.SV.BotRaid
             var dupe = lobbyTrainersFinal.Count > 1 && nidDupe.Distinct().Count() == 1;
             if (dupe)
             {
-                // We read bad data, reset game to end early and recover.
-                var msg = "Oops! Something went wrong, resetting to recover.";
+                // 我們讀取到了錯誤的資料，重新啟動遊戲以提前結束並進行恢復。
+                var msg = "糟糕！出了些問題，正在重置以進行恢復。";
                 bool success = false;
                 for (int attempt = 1; attempt <= 3; attempt++)
                 {
@@ -728,10 +728,10 @@ namespace SysBot.Pokemon.SV.BotRaid
                     }
                     catch (Exception ex)
                     {
-                        Log($"Attempt {attempt} failed with error: {ex.Message}");
+                        Log($"第 {attempt} 次嘗試失敗，錯誤訊息: {ex.Message}");
                         if (attempt == 3)
                         {
-                            Log("All attempts failed. Continuing without sending embed.");
+                            Log("所有嘗試均失敗。將繼續進行而不發送嵌入訊息。");
                         }
                     }
                 }
@@ -757,10 +757,10 @@ namespace SysBot.Pokemon.SV.BotRaid
                 }
                 catch (Exception ex)
                 {
-                    Log($"Attempt {attempt} failed with error: {ex.Message}");
+                    Log($"第 {attempt} 次嘗試失敗，錯誤訊息: {ex.Message}");
                     if (attempt == 3)
                     {
-                        Log("All attempts failed. Continuing without sending embed.");
+                        Log("所有嘗試均失敗。將繼續進行而不發送嵌入訊息。");
                     }
                 }
             }
@@ -778,37 +778,38 @@ namespace SysBot.Pokemon.SV.BotRaid
 
             while (await IsConnectedToLobby(token).ConfigureAwait(false))
             {
-                // New check: Are we still in a raid?
+                // 新檢查: 我們仍然在戰鬥中嗎？
                 if (!await IsInRaid(token).ConfigureAwait(false))
                 {
-                    Log("Not in raid anymore, stopping battle actions.");
+                    Log("不再處於戰鬥中，停止戰鬥動作。");
                     return false;
                 }
+
                 TimeSpan timeInBattle = DateTime.Now - battleStartTime;
 
-                // Check for battle timeout
+                // 檢查是否超時
                 if (timeInBattle.TotalMinutes >= 15)
                 {
-                    Log("Battle timed out after 15 minutes. Even Netflix asked if I was still watching...");
+                    Log("戰鬥在15分鐘後超時。就連 Netflix 都會問我是否還在觀看...");
                     timedOut = true;
                     break;
                 }
 
-                // Handle the first action with a delay
+                // 使用延遲處理第一個動作
                 if (!hasPerformedAction1)
                 {
                     int action1DelayInSeconds = Settings.ActiveRaids[RotationCount].Action1Delay;
                     var action1Name = Settings.ActiveRaids[RotationCount].Action1;
                     int action1DelayInMilliseconds = action1DelayInSeconds * 1000;
-                    Log($"Waiting {action1DelayInSeconds} seconds. No rush, we're chilling.");
+                    Log($"等待 {action1DelayInSeconds} 秒。別著急，我們正在放鬆。");
                     await Task.Delay(action1DelayInMilliseconds, token).ConfigureAwait(false);
                     await MyActionMethod(token).ConfigureAwait(false);
-                    Log($"{action1Name} done. Wasn't that fun?");
+                    Log($"{action1Name} 完成。這不是很有趣嗎？");
                     hasPerformedAction1 = true;
                 }
                 else
                 {
-                    // Execute raid actions based on configuration
+                    // 根據設定執行團體戰行動
                     switch (Settings.LobbyOptions.Action)
                     {
                         case RaidAction.AFK:
@@ -825,22 +826,24 @@ namespace SysBot.Pokemon.SV.BotRaid
                     }
                 }
 
-                // Periodic battle status log at 2-minute intervals
+                // 每隔2分鐘記錄一次戰鬥狀態
                 if (timeInBattle.TotalMinutes >= nextUpdateMinute)
                 {
-                    Log($"{nextUpdateMinute} minutes have passed. We are still in battle...");
-                    nextUpdateMinute += 2; // Update the time for the next status update.
+                    Log($"{nextUpdateMinute} 分鐘已過。我們仍在戰鬥中...");
+                    nextUpdateMinute += 2; // 更新下一次狀態更新的時間
                 }
-                // Check if the battle has been ongoing for 6 minutes
+
+                // 檢查是否戰鬥已進行了6分鐘且未按過主畫面按鈕
                 if (timeInBattle.TotalMinutes >= 6 && !hasPressedHome)
                 {
-                    // Hit Home button twice in case we are stuck
+                    // 按兩次主畫面按鈕，以防卡住
                     await Click(HOME, 0_500, token).ConfigureAwait(false);
                     await Click(HOME, 0_500, token).ConfigureAwait(false);
                     hasPressedHome = true;
                 }
-                // Make sure to wait some time before the next iteration to prevent a tight loop
-                await Task.Delay(1000, token); // Wait for a second before checking again
+
+                // 確保在下一次迴圈前等待一段時間，避免過於密集的迴圈
+                await Task.Delay(1000, token); // 等待一秒後再次檢查
             }
 
             return !timedOut;
@@ -850,7 +853,7 @@ namespace SysBot.Pokemon.SV.BotRaid
         {
             LobbyFiltersCategory settings = new();
 
-            Log("Raid lobby disbanded!");
+            Log("團隊大廳已解散！");
             await Task.Delay(1_500 + settings.ExtraTimeLobbyDisband, token).ConfigureAwait(false);
             await Click(B, 0_500, token).ConfigureAwait(false);
             await Click(B, 0_500, token).ConfigureAwait(false);
@@ -860,11 +863,11 @@ namespace SysBot.Pokemon.SV.BotRaid
 
             if (Settings.LobbyOptions.LobbyMethod == LobbyMethodOptions.SkipRaid)
             {
-                Log($"Lost/Empty Lobbies: {LostRaid}/{Settings.LobbyOptions.SkipRaidLimit}");
+                Log($"失敗/空團隊數量: {LostRaid}/{Settings.LobbyOptions.SkipRaidLimit}");
 
                 if (LostRaid >= Settings.LobbyOptions.SkipRaidLimit)
                 {
-                    Log($"We had {Settings.LobbyOptions.SkipRaidLimit} lost/empty raids.. Moving on!");
+                    Log($"已達到 {Settings.LobbyOptions.SkipRaidLimit} 次失敗/空團隊數量。繼續下一步！");
                     await SanitizeRotationCount(token).ConfigureAwait(false);
                     await EnqueueEmbed(null, "", false, false, true, false, token).ConfigureAwait(false);
                     ready = true;
@@ -876,7 +879,7 @@ namespace SysBot.Pokemon.SV.BotRaid
 
         private async Task FinalizeRaidCompletion(List<(ulong, RaidMyStatus)> trainers, bool ready, CancellationToken token)
         {
-            Log("Returning to overworld...");
+            Log("返回到主世界...");
             await Task.Delay(2_500, token).ConfigureAwait(false);
             while (!await IsOnOverworld(OverworldOffset, token).ConfigureAwait(false))
                 await Click(A, 1_000, token).ConfigureAwait(false);
@@ -901,10 +904,10 @@ namespace SysBot.Pokemon.SV.BotRaid
                     RotationCount = (RotationCount + 1) % Settings.ActiveRaids.Count;
                     if (RotationCount == 0)
                     {
-                        Log($"Resetting Rotation Count to {RotationCount}");
+                        Log($"重置旋轉計數為 {RotationCount}");
                     }
 
-                    Log($"Moving on to next rotation for {Settings.ActiveRaids[RotationCount].Species}.");
+                    Log($"開始進行下一輪 {Settings.ActiveRaids[RotationCount].Species} 的操作。");
                     await StartGameRaid(Hub.Config, token).ConfigureAwait(false);
                 }
                 else
@@ -968,8 +971,8 @@ namespace SysBot.Pokemon.SV.BotRaid
                     break;
 
                 default:
-                    Console.WriteLine("Unknown action, what's the move?");
-                    throw new InvalidOperationException("Unknown action type!");
+                    Console.WriteLine("未知的動作類型，請問您的意圖是什麼？");
+                    throw new InvalidOperationException("未知的動作類型！");
             }
         }
 
@@ -978,52 +981,52 @@ namespace SysBot.Pokemon.SV.BotRaid
             List<long> pointer = CalculateDirectPointer(raidIndex);
             int areaIdOffset = 20;
 
-            return await ReadValue("Area ID", 4, AdjustPointer(pointer, areaIdOffset), token);
+            return await ReadValue("區域識別碼", 4, AdjustPointer(pointer, areaIdOffset), token);
         }
 
         private async Task CountRaids(List<(ulong, RaidMyStatus)>? trainers, CancellationToken token)
         {
             if (trainers is not null)
             {
-                Log("Back in the overworld, checking if we won or lost.");
+                Log("回到了遊戲世界，檢查是否勝利或失敗。");
 
                 int currentRaidIndex = SeedIndexToReplace;
                 uint areaId = await ReadAreaId(currentRaidIndex, token);
 
                 if (areaId == 0)
                 {
-                    Log("Yay! We defeated the raid!");
+                    Log("耶！我們打敗了這次的團戰！");
                     WinCount++;
                 }
                 else
                 {
-                    Log("Dang, we lost the raid.");
+                    Log("哎呀，我們輸了這場團戰。");
                     LossCount++;
                 }
             }
             else
             {
-                Log("No trainers available to check win/loss status.");
+                Log("沒有可用的訓練師來檢查勝負狀態。");
             }
         }
 
         private async Task OverrideTodaySeed(CancellationToken token)
         {
-            Log("Attempting to override Today Seed...");
+            Log("嘗試覆蓋今日種子...");
 
             var todayoverride = BitConverter.GetBytes(TodaySeed);
             List<long> ptr = new(Offsets.RaidBlockPointerP);
             ptr[3] += 0x8;
             await SwitchConnection.PointerPoke(todayoverride, ptr, token).ConfigureAwait(false);
 
-            Log("Today Seed override complete.");
+            Log("今日種子覆蓋完成。");
         }
 
         private async Task OverrideSeedIndex(int index, CancellationToken token)
         {
             if (index == -1)
             {
-                Log("Index is -1, skipping seed override.");
+                Log("索引為 -1，跳過種子覆蓋。");
                 return;
             }
 
@@ -1038,7 +1041,7 @@ namespace SysBot.Pokemon.SV.BotRaid
             if ((IsKitakami || IsBlueberry) && (crystalType == TeraCrystalType.Might || crystalType == TeraCrystalType.Distribution))
             {
                 crystalType = TeraCrystalType.Black;
-                Log("User is not in Paldea. Setting crystal type to Black.");
+                Log("用戶不在帕底亞。將水晶類型設置為黑色。");
             }
 
             if (crystalType == TeraCrystalType.Might || crystalType == TeraCrystalType.Distribution)
@@ -1049,7 +1052,7 @@ namespace SysBot.Pokemon.SV.BotRaid
                     List<long> prevPtr = DeterminePointer(index);
                     byte[] defaultSeedBytes = BitConverter.GetBytes(defaultSeed);
                     await SwitchConnection.PointerPoke(defaultSeedBytes, prevPtr, token).ConfigureAwait(false);
-                    Log($"Set default seed {defaultSeed:X8} at previous index {index}.");
+                    Log($"在上一個索引 {index} 設置默認種子 {defaultSeed:X8}。");
                     await Task.Delay(1_500, token).ConfigureAwait(false);
                 }
                 if (SpeciesToGroupIDMap.TryGetValue(speciesName, out var groupIDAndIndices))
@@ -1057,15 +1060,15 @@ namespace SysBot.Pokemon.SV.BotRaid
                     var specificIndexInfo = groupIDAndIndices.FirstOrDefault(x => x.GroupID == groupID);
                     if (specificIndexInfo != default)
                     {
-                        index = specificIndexInfo.Index; // Adjusted index based on GroupID and species
-                        denIdentifier = specificIndexInfo.DenIdentifier; // Capture the DenIdentifier for teleportation
-                        Log($"Using specific index {index} for GroupID: {groupID}, species: {speciesName}, and DenIdentifier: {denIdentifier}.");
+                        index = specificIndexInfo.Index; // 根據 GroupID 和物種調整的索引
+                        denIdentifier = specificIndexInfo.DenIdentifier; // 捕獲巢穴標識以進行傳送
+                        Log($"使用特定索引 {index} 進行 GroupID：{groupID}，物種：{speciesName}，和 Den 識別符：{denIdentifier}。");
                     }
                 }
                 List<long> ptr = DeterminePointer(index);
                 byte[] seedBytes = BitConverter.GetBytes(seed);
                 await SwitchConnection.PointerPoke(seedBytes, ptr, token).ConfigureAwait(false);
-                Log($"Injected seed {seed:X8} at index {index}.");
+                Log($"已注入種子 {seed:X8} 到索引 {index}。");
 
                 var crystalPtr = new List<long>(ptr);
                 crystalPtr[3] += 0x08;
@@ -1075,44 +1078,45 @@ namespace SysBot.Pokemon.SV.BotRaid
 
                 // Teleportation logic
                 if (denIdentifier != null && denLocations.TryGetValue(denIdentifier, out var coordinates))
-                {
-                    await TeleportToDen(coordinates[0], coordinates[1], coordinates[2], token);
-                    Log($"Successfully teleported to the den: {denIdentifier} with coordinates {String.Join(", ", coordinates)}.");
-                }
-                else
-                {
-                    Log($"Failed to find den location for DenIdentifier: {denIdentifier}.");
-                }
+                    if (coordinates != null && coordinates.Length == 3)
+                    {
+                        await TeleportToDen(coordinates[0], coordinates[1], coordinates[2], token);
+                        Log($"成功傳送到巢穴：{denIdentifier}，座標為 {String.Join(", ", coordinates)}。");
+                    }
+                    else
+                    {
+                        Log($"未找到巢穴位置：{denIdentifier}。");
+                    }
             }
             else
             {
                 List<long> ptr = DeterminePointer(index);
-                // Overriding the seed
+                // 覆蓋種子
                 byte[] inj = BitConverter.GetBytes(seed);
                 var currseed = await SwitchConnection.PointerPeek(4, ptr, token).ConfigureAwait(false);
 
-                // Reverse the byte array of the current seed for logging purposes if necessary
+                // 對於日誌目的，如果需要，反轉當前種子的字节数組
                 byte[] currSeedForLogging = (byte[])currseed.Clone();
                 if (BitConverter.IsLittleEndian)
                 {
                     Array.Reverse(currSeedForLogging);
                 }
 
-                // Reverse the byte array of the new seed for logging purposes if necessary
+                // 對於日誌目的，如果需要，反轉新種子的字节数組
                 byte[] injForLogging = (byte[])inj.Clone();
                 if (BitConverter.IsLittleEndian)
                 {
                     Array.Reverse(injForLogging);
                 }
 
-                // Convert byte arrays to hexadecimal strings for logging
+                // 將字節數組轉換為十六進制字符串以進行日誌記錄
                 string currSeedHex = BitConverter.ToString(currSeedForLogging).Replace("-", "");
                 string newSeedHex = BitConverter.ToString(injForLogging).Replace("-", "");
 
-                Log($"Replacing {currSeedHex} with {newSeedHex}.");
+                Log($"將 {currSeedHex} 替換為 {newSeedHex}。");
                 await SwitchConnection.PointerPoke(inj, ptr, token).ConfigureAwait(false);
 
-                // Overriding the crystal type
+                // 覆蓋水晶類型
                 var ptr2 = new List<long>(ptr);
                 ptr2[3] += 0x08;
                 var crystal = BitConverter.GetBytes((int)crystalType);
@@ -1124,36 +1128,40 @@ namespace SysBot.Pokemon.SV.BotRaid
 
         private void CreateAndAddRandomShinyRaidAsRequested()
         {
-            // Generate a random shiny seed
-            uint randomSeed = GenerateRandomShinySeed();
-            Random random = new();
+            // 生成隨機的閃光寶可夢種子
+            uint randomSeed = GenerateRandomShinySeed(); // 生成隨機的閃光寶可夢種子
+            Random random = new Random(); // 初始化隨機數生成器
 
-            // Get the settings object
-            var mysteryRaidsSettings = Settings.RaidSettings.MysteryRaidsSettings;
+            // 獲取設定對象
+            var mysteryRaidsSettings = Settings.RaidSettings.MysteryRaidsSettings; // 獲取神秘突襲設置
 
-            // Check if any Mystery Raid setting is enabled
+            // 檢查是否啟用任何神秘突襲設置
             if (!(mysteryRaidsSettings.Unlocked3StarSettings.Enabled || mysteryRaidsSettings.Unlocked4StarSettings.Enabled ||
                   mysteryRaidsSettings.Unlocked5StarSettings.Enabled || mysteryRaidsSettings.Unlocked6StarSettings.Enabled))
             {
-                Log("All Mystery Raids options are disabled. Mystery Raids will be turned off.");
-                Settings.RaidSettings.MysteryRaids = false; // Disable Mystery Raids
-                return; // Exit the method
+                Log("所有神秘突襲選項都已禁用。將關閉神秘突襲功能。");
+                Settings.RaidSettings.MysteryRaids = false; // 禁用神秘突襲
+                return; // 退出方法
             }
 
-            // Create a list of enabled StoryProgressLevels
+            // 建立已啟用的故事進度級別列表
             var enabledLevels = new List<GameProgress>();
             if (mysteryRaidsSettings.Unlocked3StarSettings.Enabled) enabledLevels.Add(GameProgress.Unlocked3Stars);
             if (mysteryRaidsSettings.Unlocked4StarSettings.Enabled) enabledLevels.Add(GameProgress.Unlocked4Stars);
             if (mysteryRaidsSettings.Unlocked5StarSettings.Enabled) enabledLevels.Add(GameProgress.Unlocked5Stars);
             if (mysteryRaidsSettings.Unlocked6StarSettings.Enabled) enabledLevels.Add(GameProgress.Unlocked6Stars);
 
-            // Randomly pick a StoryProgressLevel from the enabled levels
+            // 從已啟用的級別中隨機選擇一個故事進度級別
             GameProgress gameProgress = enabledLevels[random.Next(enabledLevels.Count)];
 
-            // Initialize a list to store possible difficulties
-            List<int> possibleDifficulties = [];
+            // 初始化存儲可能難度的列表
+            List<int> possibleDifficulties = new List<int>();
+            // 根據選定的故事進度級別確定可能的難度
+            // (這部分程式碼應該是接下來實現的)
 
-            // Determine possible difficulties based on the selected GameProgress
+            // 在此省略了可能的難度的處理邏輯，需要根據具體需求進行實現
+
+            // 下面可以添加實現具體邏輯的程式碼
             switch (gameProgress)
             {
                 case GameProgress.Unlocked3Stars:
@@ -1183,30 +1191,30 @@ namespace SysBot.Pokemon.SV.BotRaid
                     break;
             }
 
-            // Check if there are any enabled difficulty levels
+            // 檢查是否有啟用的難度級別
             if (possibleDifficulties.Count == 0)
             {
-                Log("No difficulty levels enabled for the selected Story Progress. Mystery Raids will be turned off.");
-                Settings.RaidSettings.MysteryRaids = false; // Disable Mystery Raids
-                return; // Exit the method
+                Log("所選的故事進度沒有啟用的難度級別。將關閉神秘突襲功能。");
+                Settings.RaidSettings.MysteryRaids = false; // 禁用神秘突襲
+                return; // 退出方法
             }
 
-            // Randomly pick a difficulty level from the possible difficulties
+            // 從可能的難度中隨機選擇一個難度級別
             int randomDifficultyLevel = possibleDifficulties[random.Next(possibleDifficulties.Count)];
 
-            // Determine the crystal type based on difficulty level
+            // 根據難度級別決定水晶類型
             var crystalType = randomDifficultyLevel switch
             {
                 >= 1 and <= 5 => TeraCrystalType.Base,
                 6 => TeraCrystalType.Black,
-                _ => throw new ArgumentException("Invalid difficulty level.")
+                _ => throw new ArgumentException("無效的難度級別。")
             };
 
             RotatingRaidParameters newRandomShinyRaid = new()
             {
                 Seed = randomSeed.ToString("X8"),
                 Species = Species.None,
-                Title = "Mystery Shiny Raid",
+                Title = "神秘閃光Raid",
                 AddedByRACommand = true,
                 DifficultyLevel = randomDifficultyLevel,
                 StoryProgress = (GameProgressEnum)gameProgress,
@@ -1214,15 +1222,15 @@ namespace SysBot.Pokemon.SV.BotRaid
                 IsShiny = true
             };
 
-            // Find the last position of a raid added by the RA command
+            // 尋找由 RA 命令添加的最後一個突襲的位置
             int lastRaCommandRaidIndex = Settings.ActiveRaids.FindLastIndex(raid => raid.AddedByRACommand);
             int insertPosition = lastRaCommandRaidIndex != -1 ? lastRaCommandRaidIndex + 1 : RotationCount + 1;
 
-            // Insert the new raid at the determined position
+            // 在確定的位置插入新的神秘閃光突襲
             Settings.ActiveRaids.Insert(insertPosition, newRandomShinyRaid);
 
-            // Log the addition for debugging purposes
-            Log($"Added Mystery Shiny Raid with seed: {randomSeed:X} at position {insertPosition}");
+            // 為了調試目的記錄添加操作
+            Log($"已添加神秘閃光突襲，種子為：{randomSeed:X}，位置為 {insertPosition}");
         }
 
         private static uint GenerateRandomShinySeed()
@@ -1253,45 +1261,47 @@ namespace SysBot.Pokemon.SV.BotRaid
 
         private async Task<uint> ReadValue(string fieldName, int size, List<long> pointer, CancellationToken token)
         {
+            // 從指定的指標位置讀取指定大小的位元組陣列
             byte[] valueBytes = await SwitchConnection.PointerPeek(size, pointer, token).ConfigureAwait(false);
             //  Log($"{fieldName} - Read Value: {BitConverter.ToString(valueBytes)}");
 
-            // Determine the byte order based on the field name
+            // 根據欄位名稱確定位元組順序
             bool isBigEndian = fieldName.Equals("Den ID");
 
             if (isBigEndian)
             {
-                // If the value is in big-endian format, reverse the byte array
+                // 如果數值是大端格式，反轉位元組陣列
                 Array.Reverse(valueBytes);
             }
 
-            // Convert the byte array to uint (now in little-endian format)
+            // 將位元組陣列轉換為 uint（現在是小端格式）
             return BitConverter.ToUInt32(valueBytes, 0);
         }
 
         private async Task LogAndUpdateValue(string fieldName, uint value, int size, List<long> pointer, CancellationToken token)
         {
             _ = await SwitchConnection.PointerPeek(size, pointer, token).ConfigureAwait(false);
+            // 記錄目前的值（如果需要）
             // Log($"{fieldName} - Current Value: {BitConverter.ToString(currentValue)}");
 
-            // Determine the byte order based on the field name
+            // 根據欄位名稱確定位元組順序
             bool isBigEndian = fieldName.Equals("Den ID");
 
-            // Create a new byte array for the new value
-            byte[] newValue = new byte[4]; // Assuming uint is 4 bytes
+            // 創建新的位元組陣列來存放新值
+            byte[] newValue = new byte[4]; // 假設 uint 是 4 個位元組
             if (isBigEndian)
             {
-                newValue[0] = (byte)(value >> 24); // Most significant byte
+                newValue[0] = (byte)(value >> 24); // 最高有效位元組
                 newValue[1] = (byte)(value >> 16);
                 newValue[2] = (byte)(value >> 8);
-                newValue[3] = (byte)(value);       // Least significant byte
+                newValue[3] = (byte)(value);       // 最低有效位元組
             }
             else
             {
-                newValue[0] = (byte)(value);       // Least significant byte
+                newValue[0] = (byte)(value);       // 最低有效位元組
                 newValue[1] = (byte)(value >> 8);
                 newValue[2] = (byte)(value >> 16);
-                newValue[3] = (byte)(value >> 24); // Most significant byte
+                newValue[3] = (byte)(value >> 24); // 最高有效位元組
             }
 
             await SwitchConnection.PointerPoke(newValue, pointer, token).ConfigureAwait(false);
@@ -2242,7 +2252,7 @@ namespace SysBot.Pokemon.SV.BotRaid
             }
 
             string disclaimer = Settings.ActiveRaids.Count > 1
-                                ? $"notpaldea.net"
+                                ? $"Pokemon S/V Raid Bot"
                                 : "";
 
             var turl = string.Empty;
@@ -2314,10 +2324,10 @@ namespace SysBot.Pokemon.SV.BotRaid
             // Create the future time message using Discord's timestamp formatting
             string futureTimeMessage = $"**Raid Posting: <t:{futureUnixTime}:R>**";
 
-            // Initialize the EmbedBuilder object
+            // 初始化 EmbedBuilder 對象
             var embed = new EmbedBuilder()
             {
-                Title = disband ? $"**Raid canceled: [{TeraRaidCode}]**" : upnext && Settings.RaidSettings.TotalRaidsToHost != 0 ? $"Raid Ended - Preparing Next Raid!" : upnext && Settings.RaidSettings.TotalRaidsToHost == 0 ? $"Raid Ended - Preparing Next Raid!" : "",
+                Title = disband ? $"**Raid 取消: [{TeraRaidCode}]**" : upnext && Settings.RaidSettings.TotalRaidsToHost != 0 ? $"Raid結束 - 準備下一次Raid！" : upnext && Settings.RaidSettings.TotalRaidsToHost == 0 ? $"Raid結束 - 準備下一次Raid！" : "",
                 Color = embedColor,
                 Description = disband ? message : upnext ? Settings.RaidSettings.TotalRaidsToHost == 0 ? $"# {Settings.ActiveRaids[RotationCount].Title}\n\n{futureTimeMessage}" : $"# {Settings.ActiveRaids[RotationCount].Title}\n\n{futureTimeMessage}" : raidstart ? "" : description,
                 ThumbnailUrl = upnext ? turl : (imageBytes == null ? turl : null), // Set ThumbnailUrl based on upnext and imageBytes
@@ -2356,7 +2366,7 @@ namespace SysBot.Pokemon.SV.BotRaid
                 uptimeFormatted = uptimeFormatted.Trim();
                 embed.WithFooter(new EmbedFooterBuilder()
                 {
-                    Text = $"Completed Raids: {RaidCount} (W: {WinCount} | L: {LossCount})\nActiveRaids: {raidsInRotationCount} | Uptime: {uptimeFormatted}\n" + disclaimer,
+                    Text = $"完成 Raids: {RaidCount} (W: {WinCount} | L: {LossCount})\nActiveRaids: {raidsInRotationCount} | Uptime: {uptimeFormatted}\n" + disclaimer,
                     IconUrl = programIconUrl
                 });
             }
@@ -2379,12 +2389,12 @@ namespace SysBot.Pokemon.SV.BotRaid
             if (!disband && !upnext && !raidstart)
             {
                 StringBuilder statsField = new();
-                statsField.AppendLine($"**Level**: {RaidEmbedInfoHelpers.RaidLevel}");
-                statsField.AppendLine($"**Gender**: {RaidEmbedInfoHelpers.RaidSpeciesGender}");
-                statsField.AppendLine($"**Nature**: {RaidEmbedInfoHelpers.RaidSpeciesNature}");
-                statsField.AppendLine($"**Ability**: {RaidEmbedInfoHelpers.RaidSpeciesAbility}");
-                statsField.AppendLine($"**IVs**: {RaidEmbedInfoHelpers.RaidSpeciesIVs}");
-                statsField.AppendLine($"**Scale**: {RaidEmbedInfoHelpers.ScaleText}({RaidEmbedInfoHelpers.ScaleNumber})");
+                statsField.AppendLine($"**等級**: {RaidEmbedInfoHelpers.RaidLevel}");
+                statsField.AppendLine($"**性別**: {RaidEmbedInfoHelpers.RaidSpeciesGender}");
+                statsField.AppendLine($"**性格**: {RaidEmbedInfoHelpers.RaidSpeciesNature}");
+                statsField.AppendLine($"**能力**: {RaidEmbedInfoHelpers.RaidSpeciesAbility}");
+                statsField.AppendLine($"**个体**: {RaidEmbedInfoHelpers.RaidSpeciesIVs}");
+                statsField.AppendLine($"**尺寸**: {RaidEmbedInfoHelpers.ScaleText}({RaidEmbedInfoHelpers.ScaleNumber})");
 
                 if (Settings.EmbedToggles.IncludeSeed)
                 {
@@ -2396,22 +2406,22 @@ namespace SysBot.Pokemon.SV.BotRaid
                         GameProgressEnum.Unlocked3Stars => 3,
                         _ => 6,
                     };
-                    statsField.AppendLine($"**Seed**: `{Settings.ActiveRaids[RotationCount].Seed} {Settings.ActiveRaids[RotationCount].DifficultyLevel} {storyProgressValue}`");
+                    statsField.AppendLine($"**Seed种子**: `{Settings.ActiveRaids[RotationCount].Seed} {Settings.ActiveRaids[RotationCount].DifficultyLevel} {storyProgressValue}`");
                 }
 
-                embed.AddField("**__Stats__**", statsField.ToString(), true);
+                embed.AddField("**__數據__**", statsField.ToString(), true);
                 embed.AddField("\u200b", "\u200b", true);
             }
 
             if (!disband && !upnext && !raidstart && Settings.EmbedToggles.IncludeMoves)
             {
-                embed.AddField("**__Moves__**", string.IsNullOrEmpty($"{RaidEmbedInfoHelpers.ExtraMoves}") ? string.IsNullOrEmpty($"{RaidEmbedInfoHelpers.Moves}") ? "No Moves To Display" : $"{RaidEmbedInfoHelpers.Moves}" : $"{RaidEmbedInfoHelpers.Moves}\n**Extra Moves:**\n{RaidEmbedInfoHelpers.ExtraMoves}", true);
+                embed.AddField("**__招式__**", string.IsNullOrEmpty($"{RaidEmbedInfoHelpers.ExtraMoves}") ? string.IsNullOrEmpty($"{RaidEmbedInfoHelpers.Moves}") ? "沒有可顯示的招式" : $"{RaidEmbedInfoHelpers.Moves}" : $"{RaidEmbedInfoHelpers.Moves}\n**額外招式:**\n{RaidEmbedInfoHelpers.ExtraMoves}", true);
                 RaidEmbedInfoHelpers.ExtraMoves = string.Empty;
             }
 
             if (!disband && !upnext && !raidstart && !Settings.EmbedToggles.IncludeMoves)
             {
-                embed.AddField(" **__Special Rewards__**", string.IsNullOrEmpty($"{RaidEmbedInfoHelpers.SpecialRewards}") ? "No Rewards To Display" : $"{RaidEmbedInfoHelpers.SpecialRewards}", true);
+                embed.AddField(" **__特別獎勵__**", string.IsNullOrEmpty($"{RaidEmbedInfoHelpers.SpecialRewards}") ? "沒有獎勵可顯示" : $"{RaidEmbedInfoHelpers.SpecialRewards}", true);
                 RaidEmbedInfoHelpers.SpecialRewards = string.Empty;
             }
             // Fetch the type advantage using the static RaidSpeciesTeraType from RaidEmbedInfo
@@ -2420,35 +2430,35 @@ namespace SysBot.Pokemon.SV.BotRaid
             // Only include the Type Advantage if not posting 'upnext' embed with the 'Preparing Raid' title and if the raid isn't starting or disbanding
             if (!disband && !upnext && !raidstart && Settings.EmbedToggles.IncludeTypeAdvantage)
             {
-                embed.AddField(" **__Type Advantage__**", typeAdvantage, true);
+                embed.AddField(" **__類型優勢__**", typeAdvantage, true);
                 embed.AddField("\u200b", "\u200b", true);
             }
 
             if (!disband && !upnext && !raidstart && Settings.EmbedToggles.IncludeMoves)
             {
-                embed.AddField(" **__Special Rewards__**", string.IsNullOrEmpty($"{RaidEmbedInfoHelpers.SpecialRewards}") ? "No Rewards To Display" : $"{RaidEmbedInfoHelpers.SpecialRewards}", true);
+                embed.AddField(" **__特別獎勵__**", string.IsNullOrEmpty($"{RaidEmbedInfoHelpers.SpecialRewards}") ? "沒有獎勵可顯示" : $"{RaidEmbedInfoHelpers.SpecialRewards}", true);
                 RaidEmbedInfoHelpers.SpecialRewards = string.Empty;
             }
             if (!disband && names is null && !upnext)
             {
-                embed.AddField(Settings.EmbedToggles.IncludeCountdown ? $"**__Raid Starting__**:\n**<t:{DateTimeOffset.Now.ToUnixTimeSeconds() + Settings.RaidSettings.TimeToWait}:R>**" : $"**Waiting in lobby!**", $"Raid Code: **{code}**", true);
+                embed.AddField(Settings.EmbedToggles.IncludeCountdown ? $"**__Raid開始__**:\n**<t:{DateTimeOffset.Now.ToUnixTimeSeconds() + Settings.RaidSettings.TimeToWait}:R>**" : $"**大廳等候!**", $"Raid密语: **{code}**", true);
             }
             if (!disband && names is not null && !upnext)
             {
                 var players = string.Empty;
                 if (names.Count == 0)
-                    players = "Our party dipped on us :/";
+                    players = "我們的派對向我們傾斜 :/";
                 else
                 {
                     int i = 2;
                     names.ForEach(x =>
                     {
-                        players += $"Player {i} - **{x}**\n";
+                        players += $"玩家 {i} - **{x}**\n";
                         i++;
                     });
                 }
 
-                embed.AddField($"**Raid #{RaidCount} is starting!**", players);
+                embed.AddField($"**Raid #{RaidCount} 正在开始!**", players);
             }
             if (imageBytes != null)
             {
@@ -2469,7 +2479,7 @@ namespace SysBot.Pokemon.SV.BotRaid
             {
                 if (token.IsCancellationRequested)
                 {
-                    Log("Connection attempt canceled.");
+                    Log("連線嘗試已取消。");
                     break;
                 }
                 try
@@ -2487,8 +2497,8 @@ namespace SysBot.Pokemon.SV.BotRaid
                         Log("Sending an embed message to notify about technical difficulties.");
                         EmbedBuilder embed = new()
                         {
-                            Title = "Experiencing Technical Difficulties",
-                            Description = "The bot is experiencing issues connecting online. Please stand by as we try to resolve the issue.",
+                            Title = "遇到技術困難",
+                            Description = "機器人在線上連線時遇到問題。請耐心等待，我們會盡力解決問題。",
                             Color = Discord.Color.Red,
                             ThumbnailUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/imgs/x.png"
                         };
@@ -3559,7 +3569,7 @@ namespace SysBot.Pokemon.SV.BotRaid
             }
             if (!string.IsNullOrEmpty(extraMoves))
             {
-                movesList += $"**Extra Moves:**\n{extraMoves}";
+                movesList += $"*額外招式:**\n{extraMoves}";
             }
             var specialRewards = string.Empty;
 
@@ -3569,14 +3579,14 @@ namespace SysBot.Pokemon.SV.BotRaid
             }
             catch
             {
-                specialRewards = "No valid rewards to display";
+                specialRewards = "沒有可顯示的有效獎勵";
             }
             var teraTypeLower = strings.Types[teraType].ToLower();
             var teraIconUrl = $"https://raw.githubusercontent.com/bdawg1989/sprites/main/teraicons/icon1/{teraTypeLower}.png";
-            var disclaimer = $"Current Position: {queuePosition}";
-            var titlePrefix = raid.IsShiny ? "Shiny " : "";
+            var disclaimer = $"目前位置: {queuePosition}";
+            var titlePrefix = raid.IsShiny ? "閃光 " : "";
             var formName = ShowdownParsing.GetStringFromForm(pk.Form, strings, pk.Species, pk.Context);
-            var authorName = $"{stars} ★ {titlePrefix}{(Species)encounter.Species}{(pk.Form != 0 ? $"-{formName}" : "")}{(isEvent ? " (Event Raid)" : "")}";
+            var authorName = $"{stars} ★ {titlePrefix}{(Species)encounter.Species}{(pk.Form != 0 ? $"-{formName}" : "")}{(isEvent ? " (事件 Raid)" : "")}";
 
             (int R, int G, int B) = RaidExtensions<PK9>.GetDominantColor(RaidExtensions<PK9>.PokeImg(pk, false, false));
             var embedColor = new Discord.Color(R, G, B);
@@ -3588,7 +3598,7 @@ namespace SysBot.Pokemon.SV.BotRaid
             };
             embed.AddField(x =>
             {
-                x.Name = "**__Stats__**";
+                x.Name = "**__數據__**";
                 x.Value = $"{Format.Bold($"TeraType:")} {strings.Types[teraType]} \n" +
                           $"{Format.Bold($"Level:")} {level}\n" +
                           $"{Format.Bold($"Ability:")} {strings.Ability[pk.Ability]}\n" +
@@ -3600,20 +3610,20 @@ namespace SysBot.Pokemon.SV.BotRaid
 
             if (hasMoves)
             {
-                embed.AddField("**__Moves__**", movesList, true);
+                embed.AddField("**__招式__**", movesList, true);
             }
             else
             {
-                embed.AddField("**__Moves__**", "No moves available", true);  // Default message
+                embed.AddField("**__招式__**", "沒有可用的動作", true);  // Default message
             }
 
             if (!string.IsNullOrEmpty(specialRewards))
             {
-                embed.AddField("**__Special Rewards__**", specialRewards, true);
+                embed.AddField("**__特別獎勵__**", specialRewards, true);
             }
             else
             {
-                embed.AddField("**__Special Rewards__**", "No special rewards available", true);
+                embed.AddField("**__特別獎勵__**", "沒有特別獎勵", true);
             }
 
             var programIconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/imgs/icon4.png";
@@ -3644,7 +3654,7 @@ namespace SysBot.Pokemon.SV.BotRaid
 
         private async Task<bool> SaveGame(PokeRaidHubConfig config, CancellationToken token)
         {
-            Log("Saving the Game.");
+            Log("保存遊戲。");
             await Click(B, 3_000, token).ConfigureAwait(false);
             await Click(B, 3_000, token).ConfigureAwait(false);
             await Click(X, 3_000, token).ConfigureAwait(false);

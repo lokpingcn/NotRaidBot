@@ -73,7 +73,7 @@ namespace SysBot.Pokemon
             if (typeof(T) == typeof(PK9))
                 return TrainerSettings.GetSavedTrainerData(GameVersion.SV, 9);
 
-            throw new ArgumentException("Type does not have a recognized trainer fetch.", typeof(T).Name);
+            throw new ArgumentException("類型沒有可識別的訓練師獲取。", typeof(T).Name);
         }
 
         public static ITrainerInfo GetTrainerInfo(byte gen) => TrainerSettings.GetSavedTrainerData(gen);
@@ -83,10 +83,10 @@ namespace SysBot.Pokemon
             var result = sav.GetLegalFromSet(set);
             res = result.Status switch
             {
-                LegalizationResult.Regenerated => "Regenerated",
-                LegalizationResult.Failed => "Failed",
-                LegalizationResult.Timeout => "Timeout",
-                LegalizationResult.VersionMismatch => "VersionMismatch",
+                LegalizationResult.Regenerated => "再生",
+                LegalizationResult.Failed => "失败",
+                LegalizationResult.Timeout => "超时",
+                LegalizationResult.VersionMismatch => "版本不匹配",
                 _ => "",
             };
             return result.Created;

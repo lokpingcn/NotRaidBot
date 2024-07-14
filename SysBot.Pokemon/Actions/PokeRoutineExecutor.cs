@@ -32,7 +32,7 @@ namespace SysBot.Pokemon
             {
                 var protocol = Config.Connection.Protocol;
                 var msg = protocol is SwitchProtocol.WiFi ? "sys-botbase" : "usb-botbase";
-                msg += $" version is not supported. Expected version {BotbaseVersion} or greater, and current version is {version}. Please download the latest version from: ";
+                msg += $" 版本不受支援。期望版本為 {BotbaseVersion} 或更高，當前版本為 {version}. 請從以下位置下載最新版本： ";
                 if (protocol is SwitchProtocol.WiFi)
                     msg += "https://github.com/olliz0r/sys-botbase/releases/latest";
                 else
@@ -48,13 +48,13 @@ namespace SysBot.Pokemon
 
         public async Task CheckForRAMShiftingApps(CancellationToken token)
         {
-            Log("Trainer data is not valid.");
+            Log("培訓師資料無效。");
 
             bool found = false;
             var msg = "";
             if (await SwitchConnection.IsProgramRunning(ovlloaderID, token).ConfigureAwait(false))
             {
-                msg += "Found Tesla Menu";
+                msg += "找到特斯拉菜單";
                 found = true;
             }
 
@@ -69,7 +69,7 @@ namespace SysBot.Pokemon
             {
                 msg += ".";
                 Log(msg);
-                Log("Please remove interfering applications and reboot the Switch.");
+                Log("請刪除幹擾應用程式並重新啟動交換器。");
             }
         }
     }
